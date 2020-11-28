@@ -1,43 +1,4 @@
-package com.lakegamewt.epicgame;
-
-
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.ClipData;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public class Loading extends AppCompatActivity  {
+public class LoaderActivity extends AppCompatActivity  {
     WebView test;
 
 
@@ -55,11 +16,11 @@ public class Loading extends AppCompatActivity  {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_loading);
+        setContentView(R.layout.activity_loader);
         test = findViewById(R.id.test);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-
+       // Log.d("  TEST", "TEST77");
 
         if (Build.VERSION.SDK_INT >= 21) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(test, true);
@@ -105,7 +66,7 @@ public class Loading extends AppCompatActivity  {
 
                     if (includePhoto) {
                         takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        if (takePictureIntent.resolveActivity(Loading.this.getPackageManager()) != null) {
+                        if (takePictureIntent.resolveActivity(LoaderActivity.this.getPackageManager()) != null) {
                             File photoFile = null;
                             try {
                                 photoFile = create_image();
@@ -125,7 +86,7 @@ public class Loading extends AppCompatActivity  {
 
                     if (includeVideo) {
                         takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                        if (takeVideoIntent.resolveActivity(Loading.this.getPackageManager()) != null) {
+                        if (takeVideoIntent.resolveActivity(LoaderActivity.this.getPackageManager()) != null) {
                             File videoFile = null;
                             try {
                                 videoFile = create_video();
@@ -184,8 +145,9 @@ public class Loading extends AppCompatActivity  {
         test.setWebViewClient(new WebViewClient(){
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                startActivity(new Intent(Loading.this,MainActivity.class));
-                Loading.this.finish();
+                Log.d(" TEST", String.valueOf(errorCode));
+               // startActivity(new Intent(LoaderActivity.this, MainActivity.class));
+               // LoaderActivity.this.finish();
                 overridePendingTransition(0,0);
             }
 
@@ -212,6 +174,11 @@ public class Loading extends AppCompatActivity  {
             @Override
             public void onPageFinished(WebView view, String url) {
                 CookieSyncManager.getInstance().sync();
+                SharedPreferences.Editor editor = getSharedPreferences("saveInfo", MODE_PRIVATE).edit();
+                editor.putBoolean("appState",false);
+                editor.putString("appLink", url);
+              //  Log.d(" SAVED", "SAVED");
+                editor.apply();
                 test.setVisibility(View.VISIBLE);
                 super.onPageFinished(view, url);
             }
@@ -248,7 +215,7 @@ public class Loading extends AppCompatActivity  {
         if (savedInstanceState != null) {
             test.restoreState(savedInstanceState);
             test.setVisibility(View.VISIBLE);
-        } else test.loadUrl(getIntent().getStringExtra("test"));
+        } else test.loadUrl(getIntent().getStringExtra("url"));
     }
 
 
@@ -325,7 +292,7 @@ public class Loading extends AppCompatActivity  {
     }
     public boolean file_permission(){
         if(Build.VERSION.SDK_INT >=23 && (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(Loading.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, 1);
+            ActivityCompat.requestPermissions(LoaderActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, 1);
             return false;
         }else{
             return true;
@@ -351,4 +318,3 @@ public class Loading extends AppCompatActivity  {
 
 
 }
-
